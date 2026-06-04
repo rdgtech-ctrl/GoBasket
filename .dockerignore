@@ -1,0 +1,26 @@
+**/node_modules
+# ** = any folder at any depth
+# /node_modules = the node_modules folder
+# Ignores all node_modules folders everywhere
+backend/dist
+frontend/dist
+.git
+**/.env
+# ** = any folder anywhere
+# /.env = the .env file
+# Ignores all .env files everywhere
+# Protects sensitive data (passwords, API keys)
+**/.env.*
+# Ignores all .env.* files (.env.local, .env.production, etc.)
+# Protects all environment files
+!**/.env.example
+# ! = exception (DO NOT ignore this)
+# Allows .env.example to be committed
+# Shows other developers what variables are needed
+*.log
+# Log Files = records of what happened in your app (erors,warnings,info)
+# Ignores all .log files everywhere
+# Don't commit log file
+.DS_Store
+# Ignores Mac OS folder metadata
+# Don't commit Mac-specific files
