@@ -10,6 +10,7 @@ import * as Sentry from "@sentry/node";
 import { clerkMiddleware } from "@clerk/express";
 import { clerkWebhookHandler } from "./webhooks/clerk";
 import { getEnv } from "./lib/env";
+import keepAliveCron from "./lib/cron";
 
 
 const env = getEnv();
@@ -26,6 +27,10 @@ app.post("/webhooks/clerk", rawJson, (req, res) => {
 app.use(express.json());
 app.use(cors());
 app.use(clerkMiddleware());
+// we are not using req = _req
+app.get("/health",(_req,res)=>{
+  res.json({ok:true})
+})
 
 app.get("/health", (_req, res) => {
   res.json({ ok: true });
@@ -51,6 +56,17 @@ if (fs.existsSync(publicDir)) {
     res.sendFile(path.join(publicDir, "index.html"), (err) => next(err));
   });
 }
+
+app.listen(env.PORT,()=>{
+  console.log("Listening on port:",env.PORT)
+  if(env.NODE_ENV === "production"){
+    keepAliveCron.start()
+  }
+})
+// Binds to PORT - Server listens on that port (e.g., 3000)
+// Keeps process alive - Node.js doesn't exit (stays running)
+// Accepts requests - Ready to receive HTTP requests
+// Callback executes - Runs setup code (like starting cron jobs)
 
 // sentry will be attached to the response object
 Sentry.setupExpressErrorHandler(app);
