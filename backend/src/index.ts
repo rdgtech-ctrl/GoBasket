@@ -16,7 +16,8 @@ import productRouter from "./routes/productRouter";
 import meRouter from "./routes/meRouter";
 import streamRouter from "./routes/streamRouter"
 import checkoutRouter from "./routes/checkoutRouter"
-import { polarkWebhookHandler } from "./webhooks/polar";
+import { polarWebhookHandler } from "./webhooks/polar";
+import { sentryClerkUserMiddleware } from "./middleware/sentryClerkUser";
 
 
 
@@ -31,12 +32,13 @@ app.post("/webhooks/clerk", rawJson, (req, res) => {
 });
 
 app.post("/webhooks/polar", rawJson, (req, res) => {
-  void polarkWebhookHandler(req, res);
+  void polarWebhookHandler(req, res);
 });
 
 app.use(express.json());
 app.use(cors());
 app.use(clerkMiddleware());
+app.use(sentryClerkUserMiddleware);
 // we are not using req = _req
 app.get("/health",(_req,res)=>{
   res.json({ok:true})
