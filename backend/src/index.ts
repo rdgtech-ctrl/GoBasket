@@ -14,12 +14,13 @@ import keepAliveCron from "./lib/cron";
 
 import productRouter from "./routes/productRouter";
 import meRouter from "./routes/meRouter";
-import streamRouter from "./routes/streamRouter"
-import checkoutRouter from "./routes/checkoutRouter"
+import streamRouter from "./routes/streamRouter";
+import chekoutRouter from "./routes/chekoutRouter";
+import adminRouter from "./routes/adminRouter";
+import orderRouter from "./routes/orderRouter";
+
 import { polarWebhookHandler } from "./webhooks/polar";
 import { sentryClerkUserMiddleware } from "./middleware/sentryClerkUser";
-
-
 
 const env = getEnv();
 const app = express();
@@ -30,7 +31,6 @@ const rawJson = express.raw({ type: "application/json", limit: "1mb" });
 app.post("/webhooks/clerk", rawJson, (req, res) => {
   void clerkWebhookHandler(req, res);
 });
-
 app.post("/webhooks/polar", rawJson, (req, res) => {
   void polarWebhookHandler(req, res);
 });
@@ -39,19 +39,17 @@ app.use(express.json());
 app.use(cors());
 app.use(clerkMiddleware());
 app.use(sentryClerkUserMiddleware);
-// we are not using req = _req
-app.get("/health",(_req,res)=>{
-  res.json({ok:true})
-})
 
 app.get("/health", (_req, res) => {
   res.json({ ok: true });
 });
 
-app.use("/api/me",meRouter)
-app.use("/api/products",productRouter)
-app.use("/api/stream",streamRouter)
-app.use("/api/checkout",checkoutRouter)
+app.use("/api/me", meRouter);
+app.use("/api/products", productRouter);
+app.use("/api/stream", streamRouter);
+app.use("/api/checkout", chekoutRouter);
+app.use("/api/admin", adminRouter);
+app.use("/api/orders", orderRouter);
 
 const publicDir = path.join(process.cwd(), "public");
 if (fs.existsSync(publicDir)) {
@@ -72,17 +70,6 @@ if (fs.existsSync(publicDir)) {
   });
 }
 
-app.listen(env.PORT,()=>{
-  console.log("Listening on port:",env.PORT)
-  if(env.NODE_ENV === "production"){
-    keepAliveCron.start()
-  }
-})
-// Binds to PORT - Server listens on that port (e.g., 3000)
-// Keeps process alive - Node.js doesn't exit (stays running)
-// Accepts requests - Ready to receive HTTP requests
-// Callback executes - Runs setup code (like starting cron jobs)
-
 // sentry will be attached to the response object
 Sentry.setupExpressErrorHandler(app);
 
@@ -97,14 +84,9 @@ app.use(
   },
 );
 
-// ✅ Start the server
-const PORT = env.PORT || 3000;
-
-try {
-  app.listen(PORT, () => {
-    console.log(`✅ Server running on port ${PORT}`);
-  });
-} catch (error) {
-  console.error("❌ Failed to start server:", error);
-  process.exit(1);
-}
+app.listen(env.PORT, () => {
+  console.log("Listening on port:", env.PORT);
+  if (env.NODE_ENV === "production") {
+    keepAliveCron.start();
+  }
+});
