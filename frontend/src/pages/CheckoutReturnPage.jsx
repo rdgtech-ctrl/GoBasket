@@ -16,7 +16,7 @@ function CheckoutReturnPage() {
     useEffect(() => {
         clearCart();
         clearCart();
-        // Calls a function (likely from a state manager like Redux or Context) 
+        // Calls a function (likely from a state manager like Redux or Context)  
         queryClient.invalidateQueries({ queryKey: ["orders"] });
     }, [queryClient, clearCart]);
 
